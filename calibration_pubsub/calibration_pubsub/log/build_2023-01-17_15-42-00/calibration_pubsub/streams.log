@@ -1,0 +1,25 @@
+[0.336s] Invoking command in '/home/prakt5/prakt5_ws/src/calibration_pubsub': PYTHONPATH=/home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/prefix_override:/home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base build/calibration_pubsub build --build-base /home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/build install --record /home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/install.log --single-version-externally-managed
+[0.450s] running egg_info
+[0.450s] writing build/calibration_pubsub/calibration_pubsub.egg-info/PKG-INFO
+[0.451s] writing dependency_links to build/calibration_pubsub/calibration_pubsub.egg-info/dependency_links.txt
+[0.451s] writing entry points to build/calibration_pubsub/calibration_pubsub.egg-info/entry_points.txt
+[0.451s] writing requirements to build/calibration_pubsub/calibration_pubsub.egg-info/requires.txt
+[0.451s] writing top-level names to build/calibration_pubsub/calibration_pubsub.egg-info/top_level.txt
+[0.468s] reading manifest file 'build/calibration_pubsub/calibration_pubsub.egg-info/SOURCES.txt'
+[0.469s] writing manifest file 'build/calibration_pubsub/calibration_pubsub.egg-info/SOURCES.txt'
+[0.469s] running build
+[0.469s] running build_py
+[0.469s] copying calibration_pubsub/calibration.py -> /home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/build/lib/calibration_pubsub
+[0.469s] running install
+[0.469s] running install_lib
+[0.470s] copying /home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/build/lib/calibration_pubsub/calibration.py -> /home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/python3.8/site-packages/calibration_pubsub
+[0.470s] byte-compiling /home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/python3.8/site-packages/calibration_pubsub/calibration.py to calibration.cpython-38.pyc
+[0.472s] running install_data
+[0.472s] running install_egg_info
+[0.473s] removing '/home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/python3.8/site-packages/calibration_pubsub-0.0.0-py3.8.egg-info' (and everything under it)
+[0.473s] Copying build/calibration_pubsub/calibration_pubsub.egg-info to /home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/python3.8/site-packages/calibration_pubsub-0.0.0-py3.8.egg-info
+[0.473s] running install_scripts
+[0.482s] Installing listener script to /home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/calibration_pubsub
+[0.482s] Installing talker script to /home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/calibration_pubsub
+[0.483s] writing list of installed files to '/home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/install.log'
+[0.494s] Invoked command in '/home/prakt5/prakt5_ws/src/calibration_pubsub' returned '0': PYTHONPATH=/home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/prefix_override:/home/prakt5/prakt5_ws/src/calibration_pubsub/install/calibration_pubsub/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base build/calibration_pubsub build --build-base /home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/build install --record /home/prakt5/prakt5_ws/src/calibration_pubsub/build/calibration_pubsub/install.log --single-version-externally-managed
