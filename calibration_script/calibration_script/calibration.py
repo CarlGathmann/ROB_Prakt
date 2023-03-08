@@ -1,5 +1,5 @@
 import os
-import time 
+import time
 import numpy as np
 from scipy.spatial.transform import Rotation as Rot
 import pandas as pd
@@ -7,23 +7,24 @@ import rclpy
 from rclpy.node import Node
 from morris_interface.srv import MoveService
 from morris_interface.srv import TrackingData
+
 '''
 [0.049, 0.020, 0.966, 0.253]
 [0.025, 0.046, 0.931, 0.362]
 '''
 CALIBRATION_POSITIONS = [[[0.5, -0.5, 0.45], [0.049, 0.020, 0.966, 0.253]],
-                        [[0.68, -0.15, 0.46], [0.025, 0.046, 0.931, 0.362]],
-                        [[0.60, -0.3, 0.53], [-0.052, -0.229, 0.971, 0.043]],
-                        [[0.65, 0.03, 0.53], [-0.137, 0.214, 0.917, 0.307]],
-                        [[0.441, -0.040, 0.784], [-0.085, 0.055, 0.943, 0.316]],
-                        [[0.387, -0.407, 0.638], [-0.177, -0.657, 0.727, 0.088]],
-                        [[0.449, -0.329, 0.562], [0.269, 0.952, -0.037, 0.142]],
-                        [[0.397, -0.558, 0.752], [-0.222, 0.020, 0.933, 0.283]],
-                        [[0.255, -0.400, 0.769], [-0.028, 0.002, 0.969, 0.247]],
-                        [[0.260, -0.133, 0.794], [0.030, 0.006, 0.999, 0.017]],
-                        [[0.323, -0.134, 0.552], [0.180, 0.007, 0.983, 0.016]],
-                        [[0.094, -0.319, 0.583], [0.049, -0.016, 0.899, 0.436]],
-                        [[0.292, 0.021, 0.740], [-0.082, -0.011, 0.948, -0.308]]]
+                         [[0.68, -0.15, 0.46], [0.025, 0.046, 0.931, 0.362]],
+                         [[0.60, -0.3, 0.53], [-0.052, -0.229, 0.971, 0.043]],
+                         [[0.65, 0.03, 0.53], [-0.137, 0.214, 0.917, 0.307]],
+                         [[0.441, -0.040, 0.784], [-0.085, 0.055, 0.943, 0.316]],
+                         [[0.387, -0.407, 0.638], [-0.177, -0.657, 0.727, 0.088]],
+                         [[0.449, -0.329, 0.562], [0.269, 0.952, -0.037, 0.142]],
+                         [[0.397, -0.558, 0.752], [-0.222, 0.020, 0.933, 0.283]],
+                         [[0.255, -0.400, 0.769], [-0.028, 0.002, 0.969, 0.247]],
+                         [[0.260, -0.133, 0.794], [0.030, 0.006, 0.999, 0.017]],
+                         [[0.323, -0.134, 0.552], [0.180, 0.007, 0.983, 0.016]],
+                         [[0.094, -0.319, 0.583], [0.049, -0.016, 0.899, 0.436]],
+                         [[0.292, 0.021, 0.740], [-0.082, -0.011, 0.948, -0.308]]]
 
 TEST_AMOUNT = 10
 sample_list = []
@@ -45,6 +46,7 @@ class TfClient(Node):
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result().position, self.future.result().rotation
 
+
 class ControlClient(Node):
     def __init__(self):
         super().__init__('control_client')
@@ -59,6 +61,7 @@ class ControlClient(Node):
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
+
 class TrackingClient(Node):
     def __init__(self):
         super().__init__('gripper_tracking_client')
@@ -70,11 +73,13 @@ class TrackingClient(Node):
     either gripper for the gripper pose or 
     board for the board pose
     '''
+
     def send_request(self, name):
         self.req.name = name
         self.future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result().position, self.future.result().rotation
+
 
 def main(args=None):
     ''' ROS2 CODE STARTS HERE!! '''
@@ -121,6 +126,7 @@ def main(args=None):
 
     rclpy.shutdown()
 
+
 def reorthogonalize_matrix(matrix):
     # Normalize the first column
     col1 = matrix[:, 0] / np.linalg.norm(matrix[:, 0])
@@ -140,6 +146,8 @@ def reorthogonalize_matrix(matrix):
 '''
 CALIBRATION METHODS
 '''
+
+
 # calculates the rotational matrix out of the rot quaternion([x, y, z, w]
 # with the position included the method returns a transformation matrix
 # return: transformation matrix tracking system to marker
@@ -247,7 +255,8 @@ def calculation_main(sample_list):
     end_effector_to_marker[:3, :3] = reorthogonalize_matrix(end_effector_to_marker[:3, :3])
     robot_to_tracking_system[:3, :3] = reorthogonalize_matrix(robot_to_tracking_system[:3, :3])
     end_effector_to_marker[:3, -1] = end_effector_to_marker[:3, -1] / np.linalg.norm(end_effector_to_marker[:3, -1])
-    robot_to_tracking_system[:3, -1] = robot_to_tracking_system[:3, -1] / np.linalg.norm(robot_to_tracking_system[:3, -1])
+    robot_to_tracking_system[:3, -1] = robot_to_tracking_system[:3, -1] / np.linalg.norm(
+        robot_to_tracking_system[:3, -1])
 
     df_x = pd.DataFrame(end_effector_to_marker)
     df_y = pd.DataFrame(robot_to_tracking_system)
