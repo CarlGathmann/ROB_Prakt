@@ -1,0 +1,9 @@
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/install/strip.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/install/local.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/edit_cache.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/test.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/install.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/list_install_components.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/rebuild_cache.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/morris_interface_uninstall.dir
+/home/prakt5/prakt5_ws/src/morris_interface/build/morris_interface/CMakeFiles/uninstall.dir
