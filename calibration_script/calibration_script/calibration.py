@@ -25,9 +25,7 @@ CALIBRATION_POSITIONS = [[[0.5, -0.5, 0.45], [0.049, 0.020, 0.966, 0.253]],
                         [[0.094, -0.319, 0.583], [0.049, -0.016, 0.899, 0.436]],
                         [[0.292, 0.021, 0.740], [-0.082, -0.011, 0.948, -0.308]]]
 
-print(len(CALIBRATION_POSITIONS))
-a = np.zeros((12 * len(CALIBRATION_POSITIONS), 24))
-b = np.zeros((12 * len(CALIBRATION_POSITIONS)))
+TEST_AMOUNT = 10
 sample_list = []
 
 
@@ -151,17 +149,9 @@ def quaternion_to_transformation_matrix(pos, rot):
     final_matrix[:3, :3] = rot_matrix
     final_matrix[:3, -1] = pos
     final_matrix[3] = [0, 0, 0, 1]
-    print(final_matrix)
 
     return final_matrix
 
-# separates the robot transformation matrix in the rotational and the translation part
-# return: [rotation, translation]
-def separate_transformation_matrix(transformation_matrix):
-    translation = transformation_matrix[:3, -1]
-    rotation = transformation_matrix[:3, :-1]
-
-    return rotation, translation
 
 # solves the linear equation with the system described in the paper "Non-orthogonal tool/flange and robot/world
 # calibration". The solution contains the following transformation matrices: a transformation matrix for the
@@ -169,14 +159,14 @@ def separate_transformation_matrix(transformation_matrix):
 # base to the origin of the tracking system at the last twelve places of the vector return:
 # [end_effector_to_marker, robot_to_tracking_system]
 def create_a_i_and_b_i(robot, tracking):
-    ident = np.identity(4)
     a_i = np.zeros((12, 24))
     b_i = np.zeros(12)
-    rob_rot, rob_transl = separate_transformation_matrix(robot)
+    rob_rot = robot[:3, :3]
+    rob_transl = robot[:3, -1]
     # creating the left-hand side of the equation, the matrix a_i
     for i in range(3):
         for j in range(3):
-            a_i[i * 4: i * 4 + 4, j * 4: j * 4 + 4] = ident * rob_rot[i][j]
+            a_i[i * 4: i * 4 + 4, j * 4: j * 4 + 4] = rob_rot[i][j] * np.identity(4)
         a_i[i * 4: i * 4 + 4, i * 4 + 12: i * 4 + 16] = -tracking.T
         b_i[i * 4 + 3] = -rob_transl[i]
 
@@ -185,53 +175,88 @@ def create_a_i_and_b_i(robot, tracking):
 
 def solve_lin_equation(a_matrix, b_vector):
     w = np.linalg.lstsq(a_matrix, b_vector, rcond=None)[0]
-    end_effector_to_marker = np.zeros((4, 4))
-    robot_to_tracking_system = np.zeros((4, 4))
-    end_effector_to_marker[:3, :] = w[0:12].reshape(3,4)
-    robot_to_tracking_system[:3, :] = w[12:24].reshape(3,4)
-
-    # sets the trivial row
-    end_effector_to_marker[3, 3] = 1
-    robot_to_tracking_system[3, 3] = 1
-    print("w: " + str(w))
+    end_effector_to_marker = np.append(w[0:12].reshape(3, 4), [[0, 0, 0, 1]], axis=0)
+    robot_to_tracking_system = np.append(w[12:24].reshape(3, 4), [[0, 0, 0, 1]], axis=0)
     print('e_to_m: ' + str(end_effector_to_marker))
     print('r_to_t: ' + str(robot_to_tracking_system))
     return end_effector_to_marker, robot_to_tracking_system
 
 
 # calculates the error in the calibration
-def compute_error(saved_given_matrices, saved_solution_matrices):
+def compute_error(given_matrices, saved_solution_matrices):
+    error_ident = np.linalg.inv(given_matrices[1]) @ np.linalg.inv(saved_solution_matrices[1]) \
+                  @ given_matrices[0] @ saved_solution_matrices[0]
 
-    for given_matrices in saved_given_matrices:
-        error_ident = np.linalg.inv(given_matrices[1]) @ np.linalg.inv(saved_solution_matrices[1])\
-                      @ given_matrices[0] @ saved_solution_matrices[0]
     return error_ident
 
 
+def get_random_matrix():
+    pos = np.random.uniform(-1.0, 1.0, (1, 3))
+    rot = np.random.uniform(-1.0, 1.0, (1, 4))
+    return quaternion_to_transformation_matrix(pos, rot)
+
+
+def rand_test():
+    np.set_printoptions(precision=3, linewidth=100000)
+    x_rand = get_random_matrix()
+    y_rand = get_random_matrix()
+    a = np.zeros((12 * TEST_AMOUNT, 24))
+    b = np.zeros((12 * TEST_AMOUNT))
+    for i in range(TEST_AMOUNT):
+        ri_rand = get_random_matrix()
+        ti = np.linalg.inv(y_rand) @ ri_rand @ x_rand
+        a_i, b_i = create_a_i_and_b_i(ri_rand, ti)
+        a[i * 12: i * 12 + 12, :] = a_i
+        b[i * 12: i * 12 + 12] = b_i
+    end_effector_to_marker, robot_to_tracking_system = solve_lin_equation(a, b)
+    end_effector_to_marker[:3, :3] = reorthogonalize_matrix(end_effector_to_marker[:3, :3])
+    robot_to_tracking_system[:3, :3] = reorthogonalize_matrix(robot_to_tracking_system[:3, :3])
+    print("x_rand: \n{}".format(x_rand))
+    print("y_rand: \n{}".format(y_rand))
+    print("x: \n{}".format(end_effector_to_marker))
+    print("y: \n{}".format(robot_to_tracking_system))
+
+    # print(compute_error())
+
+
+def reorthogonalize_matrix(matrix):
+    # Normalize the first column
+    col1 = matrix[:, 0] / np.linalg.norm(matrix[:, 0])
+    # Compute the second column vector
+    col2 = (matrix[:, 1] - np.dot(matrix[:, 1], col1) * col1)
+    col2 = col2 / np.linalg.norm(col2)
+    # Compute the second column vector
+    col3 = np.cross(col1, col2)
+    # Construct the re-orthogonalized matrix
+    matrix_orthogonal = np.stack((col1, col2, col3), axis=1)
+
+    return matrix_orthogonal
+
+
 def calculation_main(sample_list):
+    a = np.zeros((12 * len(sample_list), 24))
+    b = np.zeros((12 * len(sample_list)))
     for i, sample in enumerate(sample_list):
-        print('cal_main_sample' + str(sample))
-        print('cal_main_sample' + str(sample[0]))
-        print('cal_main_sample' + str(sample[1]))
         robot_matrix = quaternion_to_transformation_matrix(*sample[0])
         tracking_matrix = quaternion_to_transformation_matrix(*sample[1])
         a_i, b_i = create_a_i_and_b_i(robot_matrix, tracking_matrix)
-        a[(i * 12):(i * 12 + 12), :] = a_i
-        b[i * 12 : i * 12 + 12] = b_i
-
+        a[i * 12: i * 12 + 12, :] = a_i
+        b[i * 12: i * 12 + 12] = b_i
     end_effector_to_marker, robot_to_tracking_system = solve_lin_equation(a, b)
+
     end_effector_to_marker[:3, :3] = reorthogonalize_matrix(end_effector_to_marker[:3, :3])
-    robot_to_tracking_system[:3, :3]  = reorthogonalize_matrix(robot_to_tracking_system[:3, :3])
+    robot_to_tracking_system[:3, :3] = reorthogonalize_matrix(robot_to_tracking_system[:3, :3])
     end_effector_to_marker[:3, -1] = end_effector_to_marker[:3, -1] / np.linalg.norm(end_effector_to_marker[:3, -1])
     robot_to_tracking_system[:3, -1] = robot_to_tracking_system[:3, -1] / np.linalg.norm(robot_to_tracking_system[:3, -1])
 
     df_x = pd.DataFrame(end_effector_to_marker)
     df_y = pd.DataFrame(robot_to_tracking_system)
-    #df_error = pd.DataFrame(error_matrix)
+    # df_error = pd.DataFrame(error_matrix)
 
-    #os.makedirs('~/floating_ws', exist_ok=True)
+    # os.makedirs('~/floating_ws', exist_ok=True)
     df_x.to_csv('~/floating_ws/end_effector_to_marker.csv', index=False)
-    df_y.to_csv('~/floating_ws/robot_to_tracking_system.csv',  index=False)
+    df_y.to_csv('~/floating_ws/robot_to_tracking_system.csv', index=False)
+
 
 if __name__ == '__main__':
     main()
