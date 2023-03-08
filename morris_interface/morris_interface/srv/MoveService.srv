@@ -1,5 +1,0 @@
-#move service
-float64[] position
-float64[] rotation
----
-bool done

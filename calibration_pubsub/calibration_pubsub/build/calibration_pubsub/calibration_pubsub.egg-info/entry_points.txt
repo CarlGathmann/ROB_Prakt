@@ -1,4 +1,0 @@
-[console_scripts]
-listener = calibration_pubsub.calibration:main
-talker = calibration_pubsub.calibration:main
-
